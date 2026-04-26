@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Talent Agent</title>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #eef2f7;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    textarea, input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 12px;
+      width: 100%;
+      background: #2563eb;
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-left: 6px solid #2563eb;
+    }
+
+    .top {
+      border-left: 6px solid #16a34a;
+      background: #f0fdf4;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .rank {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .badge {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: white;
+    }
+
+    .high { background: #16a34a; }
+    .medium { background: #f59e0b; }
+    .low { background: #ef4444; }
+
+    .bar-container {
+      background: #ddd;
+      border-radius: 20px;
+      height: 10px;
+      margin: 5px 0 10px;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      border-radius: 20px;
+    }
+
+    .match { background: #2563eb; }
+    .interest { background: #f59e0b; }
+    .final { background: #16a34a; }
+
+    .label {
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .skills {
+      margin-top: 10px;
+    }
+
+    .tag {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #1e3a8a;
+      padding: 5px 10px;
+      margin: 3px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
+    .response {
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    .reason {
+      margin-top: 8px;
+      color: #444;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>AI Talent Scouting Agent</h1>
+
+<textarea id="jd" rows="5" placeholder="Enter Job Description"></textarea>
+<input type="file" id="resumes" multiple>
+
+<button onclick="submitData()">Analyze Candidates</button>
+
+<div id="result"></div>
+
+<script>
+function getBadge(score) {
+  if (score > 75) return ["High", "high"];
+  if (score > 60) return ["Medium", "medium"];
+  return ["Low", "low"];
+}
+
+async function submitData() {
+  const jd = document.getElementById("jd").value;
+  const files = document.getElementById("resumes").files;
+
+  if (!jd || files.length === 0) {
+    alert("Enter JD and upload resumes");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("jd", jd);
+
+  for (let i = 0; i < files.length; i++) {
+    formData.append("resumes", files[i]);
+  }
+
+  document.getElementById("result").innerHTML = "Analyzing...";
+
+  const res = await fetch("http://127.0.0.1:8000/process", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+
+  let html = "<h2>Ranked Candidates</h2>";
+
+  data.ranked_candidates.forEach((c, index) => {
+
+    const [label, cls] = getBadge(c.final_score);
+    const cardClass = index === 0 ? "card top" : "card";
+
+    // Extract skills from reason string
+    let skills = [];
+    if (c.reason.includes("[")) {
+      skills = c.reason.split("[")[1].split("]")[0].split(",");
+    }
+
+    html += `
+      <div class="${cardClass}">
+
+        <div class="header">
+          <div class="rank">🏆 Rank #${index + 1} - ${c.name}</div>
+          <div class="badge ${cls}">${label}</div>
+        </div>
+
+        <div class="label">Match Score (${c.match_score}%)</div>
+        <div class="bar-container">
+          <div class="bar match" style="width:${c.match_score}%"></div>
+        </div>
+
+        <div class="label">Interest Score (${c.interest_score}%)</div>
+        <div class="bar-container">
+          <div class="bar interest" style="width:${c.interest_score}%"></div>
+        </div>
+
+        <div class="label">Final Score (${c.final_score}%)</div>
+        <div class="bar-container">
+          <div class="bar final" style="width:${c.final_score}%"></div>
+        </div>
+
+        <div class="skills">
+          ${skills.map(s => `<span class="tag">${s.trim()}</span>`).join("")}
+        </div>
+
+        <div class="response">💬 ${c.reply}</div>
+        <div class="reason">📌 ${c.reason}</div>
+
+      </div>
+    `;
+  });
+
+  document.getElementById("result").innerHTML = html;
+}
+</script>
+
+</body>
+</html>
