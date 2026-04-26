@@ -155,8 +155,11 @@ async function submitData() {
 
   document.getElementById("result").innerHTML = "Analyzing...";
 
-  const res = await fetch("http://127.0.0.1:8000/process", {
+  const res = await fetch("/process", {
     method: "POST",
+    headers: {
+      "Bypass-Tunnel-Reminder": "true"
+    },
     body: formData
   });
 

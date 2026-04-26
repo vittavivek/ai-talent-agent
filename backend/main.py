@@ -2,6 +2,8 @@ from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import json
+import os
+from fastapi.staticfiles import StaticFiles
 
 # old parser (keep temporarily for /rank)
 from ai_simulation import parse_jd as old_parse_jd
@@ -116,3 +118,7 @@ async def process(jd: str = Form(...), resumes: list[UploadFile] = File(...)):
     return {
         "ranked_candidates": results
     }
+
+# Mount the frontend static files at the root
+frontend_dir = os.path.join(os.path.dirname(__file__), "../frontend")
+app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
