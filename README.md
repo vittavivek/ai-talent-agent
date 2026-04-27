@@ -1,149 +1,132 @@
 # AI Talent Agent 🚀
 
-An AI-powered system that analyzes job descriptions and candidate resumes to rank and match candidates based on skills, semantic similarity, and interest.
+> ### 🌟 **Experience it Live!**
+> 
+> 🌐 **Live Demo Application:** [**Click Here to Try the AI Talent Agent**](https://ai-talent-agent-4.onrender.com)  
+> 📖 **Interactive API Documentation:** [**Explore the API (Swagger UI)**](https://ai-talent-agent-4.onrender.com/docs)
 
 ---
 
-## 📌 Features
+## 📌 Project Overview
 
-* Parse Job Description (JD)
-* Extract Resume Information
-* Semantic Matching using AI
-* Candidate Ranking System
-* Interest Scoring
-* FastAPI Backend with REST APIs
-* Simple Frontend UI
+The **AI Talent Agent** is an intelligent web application designed to streamline the recruitment process. It analyzes a given Job Description (JD) and a batch of candidate resumes, automatically evaluating and ranking the candidates based on their semantic fit, skill overlap, and inferred interest in the role.
+
+---
+
+## 🔄 How It Works (End-to-End Workflow)
+
+The application follows a seamless pipeline to evaluate candidates:
+
+1. **Input Submission:** 
+   The user inputs a Job Description and uploads one or multiple candidate resumes via the frontend interface.
+   
+2. **Data Extraction & Parsing:**
+   - The backend uses parsing modules to intelligently extract core skills and requirements from the JD.
+   - It simultaneously processes the uploaded resumes, parsing out the candidates' skills and professional backgrounds.
+
+3. **Intelligent Semantic Matching:**
+   - The system compares the raw resume text against the job description using semantic similarity logic to compute a baseline **Match Score**.
+   - It also performs precise matching on technical skills to identify and highlight overlapping abilities.
+
+4. **Interest Scoring & Persona Simulation:**
+   - Using the `interest_agent`, the system simulates candidate behavior, generating an **Interest Score** and a customized response indicating why the candidate is a good fit and how interested they are in the position.
+
+5. **Final Evaluation & Ranking:**
+   - A weighted algorithm calculates the **Final Score** (e.g., 70% Match Score + 30% Interest Score).
+   - Candidates are automatically sorted from highest to lowest final score to highlight the best matches.
+
+6. **Interactive Presentation:**
+   - The frontend consumes the API response and displays the ranked candidates in a clean, visual card layout, showing progress bars for scores, matched skills tags, and AI-generated insights.
+
+---
+
+## ✨ Key Features
+
+* **Batch Processing:** Upload and analyze multiple resumes at once.
+* **Semantic Analysis:** Goes beyond simple keyword matching to understand context.
+* **Simulated Candidate Interest:** Provides insights into a candidate's likelihood to engage.
+* **RESTful API:** Built with FastAPI for high performance, concurrency, and easy integration.
+* **Responsive UI:** Clean HTML/CSS/JS frontend for an intuitive user experience.
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **Backend:** FastAPI, Python
-* **Frontend:** HTML, CSS, JavaScript
-* **AI/NLP:** Semantic similarity, custom scoring
-* **Tools:** Git, GitHub, Render
+* **Backend:** Python, FastAPI, Uvicorn, asyncio
+* **Frontend:** HTML5, Vanilla CSS, JavaScript
+* **AI/NLP:** Custom scoring logic, semantic matchers, and simulated parsing models
+* **Hosting:** Render
 
 ---
 
 ## 📂 Project Structure
 
-```
+```text
 ai-talent-agent/
 │
 ├── backend/
-│   ├── main.py
-│   ├── parser.py
-│   ├── resume_reader.py
-│   ├── semantic_matcher.py
-│   ├── interest_agent.py
-│   ├── requirements.txt
+│   ├── main.py                # FastAPI app entry point & API routes
+│   ├── parser.py              # Logic to parse JD and Resumes
+│   ├── resume_reader.py       # Utility to read uploaded resume files
+│   ├── semantic_matcher.py    # Logic for semantic similarity computation
+│   ├── interest_agent.py      # Module for calculating candidate interest
+│   └── requirements.txt       # Python dependencies
 │
 ├── frontend/
-│   └── index.html
+│   └── index.html             # UI for inputting JD and uploading resumes
 │
-└── README.md
+└── README.md                  # Project documentation
 ```
 
 ---
 
-## ⚙️ Setup from Scratch
+## ⚙️ Setup & Installation (Local Development)
 
-### 1. Clone Repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/vittavivek/ai-talent-agent.git
 cd ai-talent-agent
 ```
 
----
-
 ### 2. Backend Setup
+
+Ensure you have Python 3 installed. Navigate to the backend directory and set up a virtual environment:
 
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate   # Windows
+
+# Activate the virtual environment:
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+# source venv/bin/activate
+
+# Install dependencies:
 pip install -r requirements.txt
 ```
 
----
+### 3. Run the Application
 
-### 3. Run Backend
+Start the FastAPI server:
 
 ```bash
 uvicorn main:app --reload
 ```
 
-👉 API Docs:
-
-```
-http://127.0.0.1:8000/docs
-```
+The server will start at `http://127.0.0.1:8000`. The frontend is automatically served at the root `/` endpoint. Open your browser and navigate to `http://127.0.0.1:8000` to use the application locally.
 
 ---
 
-### 4. Frontend
+## 📡 API Endpoints
 
-* Open `frontend/index.html` in browser
-
----
-
-## 🚀 Deployment (Render)
-
-### Step 1: Push to GitHub
-
-```bash
-git init
-git add .
-git commit -m "initial commit"
-git remote add origin https://github.com/vittavivek/ai-talent-agent.git
-git push -u origin main
-```
-
----
-
-### Step 2: Deploy on Render
-
-* Go to https://render.com
-* New → Web Service → Select Repo
-
-**Settings:**
-
-```
-Root Directory: backend
-Build Command: pip install -r requirements.txt
-Start Command: uvicorn main:app --host 0.0.0.0 --port 10000
-```
-
----
-
-### Step 3: Access App
-
-```
-https://your-app-name.onrender.com/docs
-```
-
----
-
-## ⚠️ Important Notes
-
-* Do NOT push `venv/` folder
-* Keep `requirements.txt` minimal
-* Use `.gitignore` to exclude unnecessary files
+* **`POST /process`**
+  * **Input:** Accepts `jd` (form data string) and `resumes` (list of files). 
+  * **Output:** Returns a JSON object containing the ranked list of candidates with their match scores, interest scores, matched skills, and personalized responses.
 
 ---
 
 ## 👨‍💻 Author
 
-Vivek Vitta
-
----
-
-## ⭐ Future Improvements
-
-* Add authentication
-* Improve AI matching accuracy
-* Deploy frontend separately
-* Add database integration
-
----
+**Vivek Vitta**
