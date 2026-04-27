@@ -155,64 +155,70 @@ async function submitData() {
 
   document.getElementById("result").innerHTML = "Analyzing...";
 
-  const res = await fetch("/process", {
-    method: "POST",
-    headers: {
-      "Bypass-Tunnel-Reminder": "true"
-    },
-    body: formData
-  });
+  try {
+    const origin = window.location.origin;
+    const apiBaseUrl = origin.includes("127.0.0.1:8000") || origin.includes("localhost:8000")
+      ? origin
+      : "http://127.0.0.1:8000";
 
-  const data = await res.json();
+    const res = await fetch(`${apiBaseUrl}/process`, {
+      method: "POST",
+      body: formData
+    });
 
-  let html = "<h2>Ranked Candidates</h2>";
-
-  data.ranked_candidates.forEach((c, index) => {
-
-    const [label, cls] = getBadge(c.final_score);
-    const cardClass = index === 0 ? "card top" : "card";
-
-    // Extract skills from reason string
-    let skills = [];
-    if (c.reason.includes("[")) {
-      skills = c.reason.split("[")[1].split("]")[0].split(",");
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status} ${res.statusText}`);
     }
 
-    html += `
-      <div class="${cardClass}">
+    const data = await res.json();
 
-        <div class="header">
-          <div class="rank">🏆 Rank #${index + 1} - ${c.name}</div>
-          <div class="badge ${cls}">${label}</div>
+    let html = "<h2>Ranked Candidates</h2>";
+
+    data.ranked_candidates.forEach((c, index) => {
+      const [label, cls] = getBadge(c.final_score);
+      const cardClass = index === 0 ? "card top" : "card";
+
+const skills = Array.isArray(c.matched_skills) ? c.matched_skills : [];
+
+      html += `
+        <div class="${cardClass}">
+
+          <div class="header">
+            <div class="rank">🏆 Rank #${index + 1} - ${c.name}</div>
+            <div class="badge ${cls}">${label}</div>
+          </div>
+
+          <div class="label">Match Score (${c.match_score}%)</div>
+          <div class="bar-container">
+            <div class="bar match" style="width:${c.match_score}%"></div>
+          </div>
+
+          <div class="label">Interest Score (${c.interest_score}%)</div>
+          <div class="bar-container">
+            <div class="bar interest" style="width:${c.interest_score}%"></div>
+          </div>
+
+          <div class="label">Final Score (${c.final_score}%)</div>
+          <div class="bar-container">
+            <div class="bar final" style="width:${c.final_score}%"></div>
+          </div>
+
+          <div class="skills">
+            ${skills.length > 0 ? skills.map(s => `<span class="tag">${s.trim()}</span>`).join("") : `<span class="tag">No matched skills</span>`}
+          </div>
+
+          <div class="response">💬 ${c.reply}</div>
+          <div class="reason">📌 ${c.reason}</div>
+
         </div>
+      `;
+    });
 
-        <div class="label">Match Score (${c.match_score}%)</div>
-        <div class="bar-container">
-          <div class="bar match" style="width:${c.match_score}%"></div>
-        </div>
-
-        <div class="label">Interest Score (${c.interest_score}%)</div>
-        <div class="bar-container">
-          <div class="bar interest" style="width:${c.interest_score}%"></div>
-        </div>
-
-        <div class="label">Final Score (${c.final_score}%)</div>
-        <div class="bar-container">
-          <div class="bar final" style="width:${c.final_score}%"></div>
-        </div>
-
-        <div class="skills">
-          ${skills.map(s => `<span class="tag">${s.trim()}</span>`).join("")}
-        </div>
-
-        <div class="response">💬 ${c.reply}</div>
-        <div class="reason">📌 ${c.reason}</div>
-
-      </div>
-    `;
-  });
-
-  document.getElementById("result").innerHTML = html;
+    document.getElementById("result").innerHTML = html;
+  } catch (error) {
+    console.error(error);
+    document.getElementById("result").innerHTML = `<div style="color:#b91c1c;">Error: ${error.message}</div>`;
+  }
 }
 </script>
 
