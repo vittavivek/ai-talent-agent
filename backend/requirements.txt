@@ -3,7 +3,6 @@ uvicorn
 python-multipart
 pydantic
 python-dotenv
-sentence-transformers
 scikit-learn
 google-genai
 pdfplumber
