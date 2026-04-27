@@ -150,5 +150,12 @@ async def process(jd: str = Form(...), resumes: list[UploadFile] = File(...)):
     }
 
 # Mount the frontend static files at the root
-frontend_dir = os.path.join(os.path.dirname(__file__), "../frontend")
-app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+frontend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../frontend")
+
+if os.path.exists(frontend_dir):
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+else:
+    print(f"WARNING: Frontend directory not found at {frontend_dir}. API will run without frontend.")
+    @app.get("/")
+    def index_fallback():
+        return {"error": f"Frontend directory not found at {frontend_dir}. Please check your deployment settings."}
